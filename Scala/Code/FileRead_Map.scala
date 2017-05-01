@@ -3,6 +3,7 @@
 import scala.io.Source
 
 object MaxProductCityTxn extends App{
+   //change path to the transactions file accordingly. 
    var txnFile = Source.fromFile("D://transactions.txt","UTF-8")
    
    case class TXN(id:Int,txn_date:String,user_id:Int,amount:Int,product:String,city:String,payment_mode:String)
