@@ -1,0 +1,41 @@
+How login to MySQL DB in case of CDH 5.x version
+First execute below mentioned command.
+mysql -h 172.31.54.174 -u labuser -p simplilearn
+then password = simplilearn
+
+
+------
+Sqoop IMPORT from MYSQL DB to Hdfs.
+
+sqoop import --connect jdbc:mysql://172.31.54.174/simplilearn --driver com.mysql.jdbc.Driver --username labuser --password simplilearn --table emp --m 1  --target-dir emp_sqoop_import
+
+
+---------------
+Sqoop EXPORT from HDFS to MySQL.
+
+sqoop export --connect jdbc:mysql://172.31.54.174/simplilearn --driver com.mysql.jdbc.Driver --username labuser --password simplilearn --table emp_export_demo --m 1  --export-dir emp_sqoop_import
+
+//Import into hive
+sqoop import --connect jdbc:mysql://172.31.54.174/simplilearn --driver com.mysql.jdbc.Driver --username labuser --password simplilearn --table emp_export_demo --m 1  --hive-import
+
+
+Use Query parameter to import data into HDFS
+
+sqoop import --connect jdbc:mysql://172.31.54.174/simplilearn --driver com.mysql.jdbc.Driver --username labuser --password simplilearn --query 'select * from emp_export_demo where sal > 1500.0 AND $CONDITIONS' --split-by empno --target-dir emp_sqoop_import_using_query
+
+
+Incremental Append
+
+sqoop import --connect jdbc:mysql://172.31.54.174/simplilearn --driver com.mysql.jdbc.Driver --username labuser --password simplilearn --table emp_export_demo --m 1  --target-dir emp_incremental_append --check-column empno --incremental append --last-value 7934
+
+
+//Create and save sqoop job for future reuse
+
+sqoop job --create my_sqoop_job -- import --connect jdbc:mysql://172.31.54.174/simplilearn --driver com.mysql.jdbc.Driver --username labuser --password simplilearn --table emp_export_demo --m 1  --target-dir emp_incremental_append --check-column empno --incremental append --last-value 7936
+
+//sqoop job --list will display the above sqoop jobs which was created.
+
+//After that execute the same sqoop job everytime.It will automaticall remember which records were sqooped last and it incrementally sqoop new records from the last pkid which was sqooped.
+
+sqoop job --exec my_sqoop_job
+
