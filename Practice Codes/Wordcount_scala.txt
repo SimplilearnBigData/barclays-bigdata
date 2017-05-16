@@ -1,0 +1,5 @@
+val file = sc.textFile("/hsbc/fruits.txt")
+val words = file.flatMap(x => x.split(","))
+val wordsPair = words.map(x => (x,1))
+val wordCounts = wordsPair.reduceByKey(_+_)
+wordCounts.collect.foreach(println)
