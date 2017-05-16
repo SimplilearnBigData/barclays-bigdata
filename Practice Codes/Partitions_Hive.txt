@@ -1,0 +1,58 @@
+Input File: (Order_ID,Date)
+1,20140605
+2,20140605
+3,20140604
+4,20140604
+ 
+--Set following two properties for your Hive session:
+SET hive.exec.dynamic.partition=true;
+SET hive.exec.dynamic.partition.mode=nonstric;
+ 
+--Create your staging table without Partition 
+ 
+hive> create external table tanveer.staging_orders (orderid int,order_date string) row format delimited fields terminated by ",";
+OK
+Time taken: 4.235 seconds
+hive>
+ 
+--load data to your Hive Table:
+ 
+hive> load data local inpath  '/hivetables/order_date' into table tanveer.staging_orders;
+Copying data from file:/home/auto/tkhan3/hivetables/order_date
+Copying file: file:/home/auto/tkhan3/hivetables/order_date/20140605
+Copying file: file:/home/auto/tkhan3/hivetables/order_date/20140604
+Loading data to table tanveer.staging_orders
+OK
+Time taken: 1.023 seconds
+ 
+--verify data is loaded correctly in staging table
+ 
+hive> select count(*) from tanveer.staging_orders;
+OK
+4
+ 
+--Seems we are good that data loaded into Hive.
+ 
+--Create production table with the columns you want to parition upon. In this case we want to partition upon date column:
+ 
+hive> create external table tanveer.production_orders (orderid string,order_date string) partitioned by (date_part string) row format delimited fields terminated by ',';
+OK
+hive>
+ 
+--Load the Data into production table and insert from staging table such that data is paritioned in production table depending upon the date in record in staging table.
+--Do make sure that the column on which you want to partition should come last in select statements. If there are series of column then there oerder in parition(col3,col4) should match in select statement.
+ 
+hive> insert overwrite table tanveer.production_orders partition(date_part) select orderid, order_date,order_date as date_part from tanveer.staging_orders;
+OK
+ 
+--Verify data is correctly populated in partition:
+ 
+hive> select * from tanveer.production_orders where date_part="20140605";
+OK
+3       20140605        20140605
+4       20140605        20140605
+ 
+hive> select * from tanveer.production_orders where date_part="20140604";
+OK
+1       20140604        20140604
+2       20140604        20140604
