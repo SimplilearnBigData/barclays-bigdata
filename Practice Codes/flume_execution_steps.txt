@@ -1,0 +1,7 @@
+1. copy hds_import.conf and set required properties.
+
+2. execute following command to start flume agent
+flume-ng agent --conf conf --conf-file hdfs_import.conf --name myagent -Dflume.root.logger=INFO,console
+
+3.Start source as netcat server by typing following command.
+nc localhost 9999
