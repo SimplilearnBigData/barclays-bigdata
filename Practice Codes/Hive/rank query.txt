@@ -1,0 +1,3 @@
+Find the max amount spent for a given product and city combination, also list the email address of the user who spent that max amount
+
+select t.product,t.city,t.amount,u.email from (select user_id,product,city,amount,rank() over (partition by product,city order by amount DESC) as rnk from txn_table) t JOIN user u ON t.user_id = u.id where t.rnk = 1;

@@ -1,0 +1,10 @@
+create table user(id int,email string,name string) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
+
+LOAD DATA LOCAL INPATH '/home/cloudera/users.txt' INTO TABLE user;
+
+ select max(t.amount),c.id,c.email from transaction t JOIN user c ON t.user_id = c.id group by c.id,c.email;
+ 
+ 
+INSERT OVERWRITE LOCAL DIRECTORY '/home/cloudera/join_result2' select u.email,max(t.amount) from txn t JOIN cust u ON u.id = t.user_id group by t.user_id,u.email;
+
+INSERT OVERWRITE TABLE emp select * from emp_hdfs_load;

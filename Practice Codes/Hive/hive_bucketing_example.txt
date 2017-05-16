@@ -1,0 +1,11 @@
+create table transactions(id int,txn_date string,user_id int,amount int, product string,city string,payment_mode string) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
+
+LOAD DATA LOCAL INPATH '/home/cloudera/transactions' INTO TABLE transactions;
+
+create table transactions_bucket(id int,txn_date string,user_id int,amount int, product string,city string,payment_mode string) CLUSTERED BY(city) INTO 4 BUCKETS ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
+
+set hive.enforce.bucketing=true;
+
+INSERT OVERWRITE TABLE transactions_bucket select id,txn_date,user_id,amount,product,city,payment_mode from product_order;
+
+select * from transactions_bucket TABLESAMPLE(BUCKET 2 OUT OF 4);

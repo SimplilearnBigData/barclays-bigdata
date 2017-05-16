@@ -1,0 +1,11 @@
+--Set following two properties for your Hive session:
+SET hive.exec.dynamic.partition=true;
+SET hive.exec.dynamic.partition.mode=nonstric;
+
+1.create table product_order(id int, user_id int, amount int,product string,city string,order_date string) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
+
+2.LOAD DATA LOCAL INPATH '/home/cloudera/txn' INTO TABLE product_order; 
+
+3.create table dynamic_partition_table(id int, user_id int, amount int,product string,city string) PARTITIONED BY(order_date string) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
+
+4.INSERT OVERWRITE TABLE dynamic_partition_table PARTITION(order_date) select id,user_id,amount,product,city,order_date from product_order; 
