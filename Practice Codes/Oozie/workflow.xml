@@ -1,0 +1,68 @@
+<workflow-app name="end_to_end_wf" xmlns="uri:oozie:workflow:0.1">
+	<start to="my_sqoop_action"/>
+	<action name="my_sqoop_action">
+		<sqoop xmlns="uri:oozie:sqoop-action:0.2">
+			<job-tracker>${jobTracker}</job-tracker>
+			<name-node>${nameNode}</name-node>
+			<prepare>
+				<delete path="${sqoop_import_dir}"/>
+			</prepare>
+			<configuration>
+				<property>
+					<name>mapred.compress.map.output</name>
+					<value>true</value>
+				</property>
+			</configuration>
+			<arg>import</arg>
+			<arg>--connect</arg>
+			<arg>jdbc:mysql://172.31.54.174/simplilearn</arg>
+			<arg>--username</arg>
+			<arg>labuser</arg>
+			<arg>--password</arg>
+			<arg>simplilearn</arg>
+			<arg>--table</arg>
+			<arg>emp</arg>
+			<arg>--target-dir</arg>
+			<arg>emp_oozie_demo</arg>
+			<arg>-m</arg>
+			<arg>1</arg>
+		</sqoop>
+		<ok to="hive_job"/>
+		<error to="end"/>
+	</action>
+	<action name="hive_job">
+		<hive xmlns="uri:oozie:hive-action:0.2">
+			<job-tracker>${jobTracker}</job-tracker>
+			<name-node>${nameNode}</name-node>
+			<!--<prepare>
+				<delete path="${sqoop_import_dir}"/>
+			</prepare>-->
+			<configuration>
+				<property>
+					<name>mapred.compress.map.output</name>
+					<value>true</value>
+				</property>
+				<property>
+					<name>hive.metastore.local</name>
+					<value>false</value>
+				</property>
+				<property>
+					<name>hive.metastore.uris</name>
+					<value>thrift://ec2-52-86-42-143.compute-1.amazonaws.com:9083,thrift://ip-172-31-51-30.ec2.internal:9083</value>
+				</property>
+				<property>
+					<name>hive.metastore.client.socket.timeout</name>
+					<value>300</value>
+				</property>
+				<property>
+					<name>hive.metastore.warehouse.dir</name>
+					<value>/apps/hive/warehouse</value>
+				</property>
+			</configuration>		
+			<script>hive_script.q</script>
+		</hive>
+		<ok to="end"/>
+		<error to="end"/>
+	</action>
+	<end name="end"/>
+</workflow-app>

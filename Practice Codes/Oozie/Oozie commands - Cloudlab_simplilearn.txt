@@ -1,0 +1,10 @@
+1.Execute the following command to set the Oozie url environment variable.
+export OOZIE_URL=http://ec2-52-86-42-143.compute-1.amazonaws.com:11000/oozie
+
+2.Execute Workflow or Coordinator job
+oozie job -config ~/job.properties -run -oozie http://ec2-52-86-42-143.compute-1.amazonaws.com:11000/oozie
+
+3.Once executed monitor the job id created for Workflow or Coordinator
+oozie job -info <Job id for example = 0000009-150226031715212-oozie-oozi-W>
+
+
