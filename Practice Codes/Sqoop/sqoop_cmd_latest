@@ -1,0 +1,36 @@
+How login to MySQL DB in case of CDH 5.x version
+First execute below mentioned command.
+mysql -D retail_db -u retail_dba -p
+then pass = cloudera
+
+
+------
+Sqoop IMPORT from MYSQL DB to Hdfs.
+
+sqoop import --connect jdbc:mysql://localhost:3306/retail_db --table customers --username retail_dba --password cloudera --target-dir /sqoop_import_demo -m 1
+
+---------------
+Sqoop EXPORT from MySQL to HDFS.
+sqoop export --connect jdbc:mysql://localhost:3306/retail_db --table cust_export --username retail_dba --password cloudera --export-dir /sqoop_import_demo -m 1
+
+
+Import data directly from RDBMS table to Hive.
+sqoop import --connect jdbc:mysql://localhost:3306/retail_db --username retail_dba --password cloudera --table customers --hive-import
+
+Use Query parameter to import data into HDFS
+sqoop import --connect jdbc:mysql://localhost:3306/retail_db --username retail_dba --password cloudera --query 'select c.customer_id,count(o.order_customer_id) from customers c join orders o on c.customer_id = o.order_customer_id group by o.order_customer_id having $CONDITIONS' --split-by c.customer_id --target-dir /import_using_query_demo
+
+Incremental Append
+
+sqoop import --connect jdbc:mysql://localhost:3306/retail_db --username retail_dba --password cloudera --table products --check-column product_id --incremental append --last-value 0 --target-dir /sqoop_import_append -m 1
+
+//Create and save sqoop job for future reuse
+
+sqoop job --create sqoop_product_append_job -- import --connect jdbc:mysql://localhost:3306/retail_db --username retail_dba --password cloudera --table products --check-column product_id --incremental append --last-value 1352 --target-dir /product_import_append -m 1
+
+//sqoop job --list will display the above sqoop jobs which was created.
+
+//After that execute the same sqoop job everytime.It will automaticall remember which records were sqooped last and it incrementally sqoop new records from the last pkid which was sqooped.
+
+sqoop job --exec my_sqoop_append_job
+
